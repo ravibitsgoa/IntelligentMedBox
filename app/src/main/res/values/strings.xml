@@ -12,4 +12,10 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="action_view_pres">View Prescription</string>
+    <string name="action_view_log">View Notifications log</string>
+    <string name="action_add_med">Add medicine</string>
+    <string name="title_activity_view_prescription">ViewPrescription</string>
+    <string name="title_activity_add_medicine">AddMedicine</string>
 </resources>
