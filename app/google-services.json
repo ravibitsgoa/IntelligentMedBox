@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "943451661281",
+    "firebase_url": "https://intelligent-medicine-box.firebaseio.com",
+    "project_id": "intelligent-medicine-box",
+    "storage_bucket": "intelligent-medicine-box.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:943451661281:android:ac2dc32374fc6c58",
+        "android_client_info": {
+          "package_name": "bits.se.hackstreetboys.intelligentmedbox"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "943451661281-gt7lp661npo12oec0ci1396al0dr5nod.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "bits.se.hackstreetboys.intelligentmedbox",
+            "certificate_hash": "0f62bca048b9e96e58878d24e78092b5e711a606"
+          }
+        },
+        {
+          "client_id": "943451661281-je5j9p5em3agvvgc4rrbonhbg56192e8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcUckFIBzkX4xchQIPA1u7JjwPhg1iD88"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "943451661281-je5j9p5em3agvvgc4rrbonhbg56192e8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

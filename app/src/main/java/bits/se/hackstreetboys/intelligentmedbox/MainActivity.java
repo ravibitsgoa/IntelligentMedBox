@@ -1,9 +1,14 @@
 package bits.se.hackstreetboys.intelligentmedbox;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,10 +17,33 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.google.firebase.auth.FirebaseAuth;
+
+import static bits.se.hackstreetboys.intelligentmedbox.R.string.channel_name;
+
 public class MainActivity extends AppCompatActivity {
     private RecyclerView notificationsRecyclerView;
     private RecyclerView.Adapter notificationsAdapter;
     private RecyclerView.LayoutManager layoutManager;
+    private static final String channelName = "notifications_channel";
+    private static int notificationId=0;
+
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(channelName,
+                    name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,11 +61,30 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
         String[] dataSet = {"Medicine name: Crocin, Pills: 1, Time: 09:00",
                 "Medicine name: Xanax, Pills: 2, Time: 10:00",
                 "Medicine name: Abc, Pills: 3, Time: 11:00",
                 "Medicine name: Cdf, Pills: 2, Time: 13:00",
         };
+
+        createNotificationChannel();
+        for (String notification : dataSet) {
+            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder
+                    (MainActivity.this, channelName)
+                    .setSmallIcon(R.drawable.med_icon)
+                    .setContentTitle("Alert")
+                    .setContentText(notification)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setAutoCancel(true);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+// notificationId is a unique int for each notification that you must define
+            notificationManager.notify(notificationId, mBuilder.build());
+            notificationId++;
+        }
+
         notificationsRecyclerView = (RecyclerView) findViewById(R.id.notifications);
         layoutManager = new LinearLayoutManager(this);
         notificationsRecyclerView.setLayoutManager(layoutManager);

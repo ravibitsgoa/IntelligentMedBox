@@ -18,4 +18,6 @@
     <string name="action_add_med">Add medicine</string>
     <string name="title_activity_view_prescription">ViewPrescription</string>
     <string name="title_activity_add_medicine">AddMedicine</string>
+    <string name="channel_name">notifications_channel</string>
+    <string name="channel_description">for realtime notifications</string>
 </resources>
