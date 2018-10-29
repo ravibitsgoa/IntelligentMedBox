@@ -320,7 +320,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return;
         }
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        intent.putExtra("Name", currentUser.getDisplayName());
+        //intent.putExtra("Name", currentUser.getDisplayName());
+        intent.putExtra("Name", "patient");
         intent.putExtra("Email", currentUser.getEmail());
         startActivity(intent);
     }
