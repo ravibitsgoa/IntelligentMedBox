@@ -6,62 +6,50 @@ import java.util.HashMap;
 import java.util.Map;
 
 class MyNotification {
-    private String pills;
-    private String time;
-    private String medicine;
+    private String type;
+    private String message;
 
     public MyNotification() {
     }
 
     public MyNotification(Map<String, Object> map) {
-        this.pills = (String) map.get("Pills");
-        this.medicine = (String) map.get("Medicine");
-        this.time = (String) map.get("Time");
+        this.type = (String) map.get("type");
+        this.message = (String) map.get("msg");
     }
 
-    public MyNotification(String pills, String time, String medicine) {
-        this.pills = pills;
-        this.medicine = medicine;
-        this.time = time;
+    public MyNotification(String type, String message) {
+        this.type = type;
+        this.message = message;
     }
 
-    public void setPills(String pills) {
-        this.pills = pills;
+    public String getType() {
+        return type;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public void setMedicine(String medicine) {
-        this.medicine = medicine;
+    public String getMessage() {
+        return message;
     }
 
-    public String getPills() {
-        return pills;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public String getMedicine() {
-        return medicine;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @NonNull
     @Override
     public String toString() {
-        return getMedicine()+" Pills "+
-                getPills()+"\nTime "+getTime();
+        return "Type: "+
+                getType()+"\n"+getMessage();
     }
 
     public Map<String, Object> toMap() {
         HashMap<String, Object> map = new HashMap<>();
-        map.put("uid", hashCode());
-        map.put("Pills", pills);
-        map.put("Medicine", medicine);
-        map.put("Time", time);
+        //map.put("uid", hashCode());
+        map.put("type", getType());
+        map.put("message", getMessage());
         return map;
     }
 }

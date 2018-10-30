@@ -9,6 +9,7 @@ import java.util.Map;
 public class Prescription {
     private Map<String, ArrayList<Long>> meds;
     private String expiryDate;
+    private String id;
 
     public Prescription(){
         meds = new HashMap<>();
@@ -20,12 +21,22 @@ public class Prescription {
         meds = new HashMap<>();
         for(Map.Entry<String, Object> entry: map.entrySet()) {
             String key = entry.getKey();
-            if(key.equals("ExpiryDate")) {
-                expiryDate = (String) entry.getValue();
-            } else {
-                //System.out.println(key+" "+ map.get(key));
-                HashMap<String, Object> temp = (HashMap<String, Object>) entry.getValue();
-                meds.put(key, (ArrayList<Long>) temp.get("Dosage"));
+            switch (key) {
+                case "expiry_date":
+                    expiryDate = (String) entry.getValue();
+                    break;
+                case "id":
+                    id = (String) entry.getValue();
+                    break;
+                case "medicines":
+                    meds = (Map<String, ArrayList<Long>>) entry.getValue();
+                    break;
+                default:
+                    //System.out.println(key+" "+ map.get(key));
+                    //HashMap<String, Object> temp = (HashMap<String, Object>) entry.getValue();
+                    //meds.put(key, (ArrayList<Long>) temp.get("Dosage"));
+                    meds.put(key, (ArrayList<Long>) entry.getValue());
+                    break;
             }
         }
     }
