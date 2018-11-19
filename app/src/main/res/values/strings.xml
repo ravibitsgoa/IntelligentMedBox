@@ -1,18 +1,18 @@
 <resources>
-    <string name="app_name">IntelligentMedBox</string>
+    <string name="app_name">Intelligent Medicine Box</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
-    <string name="action_sign_in">Sign in or register</string>
+    <string name="prompt_name">Name</string>
+    <string name="action_sign_in">Sign in</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Notifications</string>
     <string name="action_view_pres">View Prescription</string>
     <string name="action_view_log">View Notifications log</string>
     <string name="action_add_med">Add medicine</string>
@@ -20,4 +20,10 @@
     <string name="title_activity_add_medicine">AddMedicine</string>
     <string name="channel_name">notifications_channel</string>
     <string name="channel_description">for realtime notifications</string>
+    <string name="action_register">Register</string>
+    <string name="doctor">Doctor</string>
+    <string name="patient">Patient</string>
+    <string name="action_submit">submit</string>
+    <string name="select_account_text">Select account type</string>
+    <string name="error_insecure_password">At least 8 characters, 1 capital, 1 small, 1 digit, 1 special character required in the password.</string>
 </resources>

@@ -10,7 +10,6 @@ import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -38,6 +37,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -67,7 +67,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         populateAutoComplete();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        launchMainActivityAfterLogin(currentUser);
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -89,8 +89,71 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        Button mEmailRegisterButton = (Button) findViewById(R.id.email_register_button);
+        mEmailRegisterButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                registerNewUser();
+            }
+        });
+
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    private void registerNewUser() {
+        final String email = mEmailView.getText().toString().trim();
+        final String password = mPasswordView.getText().toString().trim();
+        View focusView = null;
+        boolean cancel = false;
+        if (TextUtils.isEmpty(email)) {
+            mEmailView.setError(getString(R.string.error_field_required));
+            focusView = mEmailView;
+            cancel = true;
+        } else if (isEmailInvalid(email)) {
+            mEmailView.setError(getString(R.string.error_invalid_email));
+            focusView = mEmailView;
+            cancel = true;
+        }
+        //System.out.println("password"+ password);
+        if(TextUtils.isEmpty(password)) {
+            mPasswordView.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView;
+            cancel = true;
+        } else if(isPasswordInvalid(password)) {
+            mPasswordView.setError(getString(R.string.error_insecure_password));
+            focusView = mPasswordView;
+            cancel = true;
+        }
+        if (cancel) {
+            // There was an error; don't attempt login and focus the first
+            // form field with an error.
+            focusView.requestFocus();
+            return;
+        }
+        // Show a progress spinner, and kick off a background task to
+        // perform the user login attempt.
+
+        showProgress(true);
+
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if(task.isSuccessful()) {
+                    Toast.makeText(LoginActivity.this, "User registered successfully!", Toast.LENGTH_SHORT).show();
+                    if (signIn(email, password)) {
+                        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                        //FirebaseUser user = mAuth.getCurrentUser();
+                        //updateUI(user);
+                        startActivity(intent);
+                    }
+                } else {
+                    Toast.makeText(LoginActivity.this, "Could not register. Please try again.", Toast.LENGTH_SHORT).show();
+                }
+                showProgress(false);
+            }
+        });
     }
 
     private void populateAutoComplete() {
@@ -156,8 +219,13 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
+        if (TextUtils.isEmpty(password)){
+            mPasswordView.setError(getString(R.string.error_field_required));
+            focusView = mPasswordView;
+            cancel = true;
+        } else if(isPasswordInvalid(password)) {
+            //System.out.println("invalid password "+ password);
+            mPasswordView.setError(getString(R.string.error_insecure_password));
             focusView = mPasswordView;
             cancel = true;
         }
@@ -167,7 +235,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } else if (isEmailInvalid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
@@ -181,11 +249,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            signIn(email, password);
+            if(signIn(email, password)){
+                FirebaseUser user = mAuth.getCurrentUser();
+                launchMainActivityAfterLogin(user);
+            }
         }
     }
 
-    private void signIn(String email, String password) {
+    private boolean signIn(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
 
@@ -194,8 +265,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d("Debug", "signInWithEmail:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w("Debug", "signInWithEmail:failure", task.getException());
@@ -213,16 +282,46 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     }
                 });
         // [END sign_in_with_email]
+        return mAuth.getCurrentUser() != null;
     }
 
-    private boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
-        return email.contains("@");
+    private boolean isEmailInvalid(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
+                "[a-zA-Z0-9_+&*-]+)*@" +
+                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                "A-Z]{2,7}$";
+
+        Pattern pat = Pattern.compile(emailRegex);
+        if (email == null)
+            return true;
+        return !pat.matcher(email).matches();
     }
 
-    private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
-        return password.length() > 4;
+    private boolean isPasswordInvalid(String password) {
+        return false;
+        /*if(password==null || password.length() < 8)
+            return true;
+        String upperCaseChars = "(.*[A-Z].*)";
+        if (!password.matches(upperCaseChars )) {
+            //Password should contain at least one upper case alphabet.
+            return true;
+        }
+        String lowerCaseChars = "(.*[a-z].*)";
+        if (!password.matches(lowerCaseChars )) {
+            //Password should contain at least one lower case alphabet.
+            return true;
+        }
+        String numbers = "(.*[0-9].*)";
+        if (!password.matches(numbers )) {
+            //Password should contain at least one number.
+            return true;
+        }
+        String specialChars = "(.*[,~,!,@,#,$,%,^,&,*,(,),-,_,=,+,[,{,],},|,;,:,<,>,/,?].*$)";
+        if (!password.matches(specialChars )) {
+            //Password should contain at least one special character.
+            return true;
+        }
+        return false;*/
     }
 
     /**
@@ -315,14 +414,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    private void updateUI(FirebaseUser currentUser) {
+    private void launchMainActivityAfterLogin(FirebaseUser currentUser) {
         if(currentUser == null) {
             return;
         }
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         //intent.putExtra("Name", currentUser.getDisplayName());
-        intent.putExtra("Name", "patient");
-        intent.putExtra("Email", currentUser.getEmail());
+        //intent.putExtra("Name", "patient");
+        //intent.putExtra("Email", currentUser.getEmail());
         startActivity(intent);
     }
 

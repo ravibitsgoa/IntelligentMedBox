@@ -42,7 +42,7 @@ class MyNotification {
     @Override
     public String toString() {
         return "Type: "+
-                getType()+"\n"+getMessage();
+                getType()+"\n"+getMessage()+"\n";
     }
 
     public Map<String, Object> toMap() {

@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +27,12 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:parentActivityName=".LoginActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="bits.se.hackstreetboys.intelligentmedbox.LoginActivity" />
+        </activity>
         <activity
             android:name=".ViewPrescription"
             android:label="@string/title_activity_view_prescription"
@@ -45,6 +51,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="bits.se.hackstreetboys.intelligentmedbox.MainActivity" />
         </activity>
+        <activity android:name=".RegisterActivity"></activity>
     </application>
 
 </manifest>

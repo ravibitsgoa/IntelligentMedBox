@@ -24,6 +24,8 @@ import android.widget.TextView;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,11 +42,12 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView notificationsRecyclerView;
     private FirebaseRecyclerAdapter<Object, MyViewHolder> notificationsAdapter;
     private RecyclerView.LayoutManager layoutManager;
-    private static String patientName;
+    private static String patientID;
     //private DatabaseReference mNotificationRef;
     private Query query;
     private static final String channelName = "notifications_channel";
     private static int notificationId=0;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +66,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        patientName = getIntent().getStringExtra("Name");
-
+        //patientName = getIntent().getStringExtra("Name");
+        firebaseAuth = FirebaseAuth.getInstance();
+        if(firebaseAuth.getCurrentUser() == null ){
+            System.out.println("Error: No user logged in.");
+            startActivity(new Intent(this, LoginActivity.class));
+        }
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        //System.out.println(user.getUid());
+        patientID= user.getUid();
         initializeScreen();
     }
 
@@ -75,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         //mNotificationRef = FirebaseDatabase.getInstance().
         //        getReference("patients/"+patientName+"/notifications");
         query = FirebaseDatabase.getInstance()
-                .getReference().child("patients/"+patientName+"/notifications")
+                .getReference().child("patients/"+patientID+"/notifications")
                 .limitToLast(50);
         ChildEventListener childEventListener = new ChildEventListener() {
             @Override
@@ -176,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.action_view_pre) {
             Intent intent = new Intent(MainActivity.this, ViewPrescription.class);
-            intent.putExtra("Name", patientName);
+            //intent.putExtra("Name", patientName);
             startActivity(intent);
             return true;
         } else if (id == R.id.action_add_med) {

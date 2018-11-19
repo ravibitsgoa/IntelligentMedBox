@@ -15,9 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -31,7 +34,7 @@ public class ViewPrescription extends AppCompatActivity {
     private FirebaseRecyclerAdapter<Object, MainActivity.MyViewHolder> prescriptionsAdapter;
     private RecyclerView.LayoutManager layoutManager;
     private Query query;
-    private static String patientName;
+    private static String patientID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +53,16 @@ public class ViewPrescription extends AppCompatActivity {
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        patientName = getIntent().getStringExtra("Name");
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        if(firebaseAuth.getCurrentUser() == null ){
+            Toast.makeText(this, "Error: No user logged in.", Toast.LENGTH_SHORT).show();
+            System.out.println("Error: No user logged in.");
+            startActivity(new Intent(this, LoginActivity.class));
+        }
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        //System.out.println(user.getUid());
+        patientID= user.getUid();
+
         initializeScreen();
     }
 
@@ -61,7 +73,7 @@ public class ViewPrescription extends AppCompatActivity {
         //mNotificationRef = FirebaseDatabase.getInstance().
         //        getReference("patients/"+patientName+"/prescriptions");
         query = FirebaseDatabase.getInstance()
-                .getReference().child("patients/"+patientName+"/prescriptions")
+                .getReference().child("patients/"+patientID+"/prescriptions")
                 .limitToLast(50);
         setupAdapter();
         prescriptionsRecyclerView.setAdapter(prescriptionsAdapter);
@@ -117,7 +129,7 @@ public class ViewPrescription extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_view_log) {
             Intent intent = new Intent(ViewPrescription.this, MainActivity.class);
-            intent.putExtra("Name", patientName);
+            //intent.putExtra("Name", patientID);
             startActivity(intent);
             return true;
         } else if (id == R.id.action_view_pre) {

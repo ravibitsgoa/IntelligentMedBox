@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+
+    <TextView
+        android:id="@+id/account_type_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/select_account_text" />
+
+    <RadioGroup
+        android:id="@+id/account_type_radio_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <RadioButton
+            android:id="@+id/doctor_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/doctor" />
+
+        <RadioButton
+            android:id="@+id/patient_radio_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/patient" />
+    </RadioGroup>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+       <EditText
+           android:id="@+id/name_edit_text"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:hint="@string/prompt_name"
+           android:inputType="textPersonName"
+           android:maxLines="1"
+           android:singleLine="true" />
+    </android.support.design.widget.TextInputLayout>
+
+    <Button
+        android:id="@+id/submit_radio_button"
+        style="?android:textAppearanceSmall"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_submit"
+        android:textStyle="bold" />
+
+</LinearLayout>
