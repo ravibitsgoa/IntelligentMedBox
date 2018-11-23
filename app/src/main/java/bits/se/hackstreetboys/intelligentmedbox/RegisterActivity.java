@@ -1,8 +1,8 @@
 package bits.se.hackstreetboys.intelligentmedbox;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +26,7 @@ public class RegisterActivity extends AppCompatActivity {
     private int selectedId;
     private EditText userName;
     private FirebaseAuth firebaseAuth;
-    private String patientID;
+    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,16 +34,16 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
 
         firebaseAuth = FirebaseAuth.getInstance();
-        if(firebaseAuth.getCurrentUser() == null ){
+        if (firebaseAuth.getCurrentUser() == null) {
             System.out.println("Error: No user logged in.");
             startActivity(new Intent(this, LoginActivity.class));
         }
         final FirebaseUser user = firebaseAuth.getCurrentUser();
         //System.out.println(user.getUid());
-        patientID= user.getUid();
+        userID = MainActivity.getUserIdFromEmail(user.getEmail());
 
         accountTypeRadioGroup = (RadioGroup) findViewById(R.id.account_type_radio_group);
-        submitButton= (Button) findViewById(R.id.submit_radio_button);
+        submitButton = (Button) findViewById(R.id.submit_radio_button);
 
         userName = (EditText) findViewById(R.id.name_edit_text);
         submitButton.setOnClickListener(new View.OnClickListener() {
@@ -62,16 +62,20 @@ public class RegisterActivity extends AppCompatActivity {
                 //       accountTypeRadioButton.getText(), Toast.LENGTH_SHORT).show();
 
 
-                if(selectedId == R.id.doctor_radio_button) {
+                if (selectedId == R.id.doctor_radio_button) {
                     Map<String, String> userData = new HashMap<>();
                     userData.put("name", String.valueOf(userName.getText()));
                     userData.put("notifications", "");
                     userData.put("prescriptions", "");
 
-                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().
-                            getReference("doctors/");
-                    databaseReference.child(patientID).setValue(userData);
-                } else if(selectedId == R.id.patient_radio_button){
+                    DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                            .getReference("doctors/");
+                    databaseReference.child(userID).setValue(userData);
+                    databaseReference.getRoot().child("usertype").child(userID).child("type").setValue("doctor");
+                    databaseReference.getRoot().child("usertype").child(userID).child("uid").setValue(user.getUid());
+                    Intent intent = new Intent(RegisterActivity.this, DoctorActivity.class);
+                    startActivity(intent);
+                } else if (selectedId == R.id.patient_radio_button) {
                     Map<String, String> userData = new HashMap<>();
                     userData.put("name", String.valueOf(userName.getText()));
                     userData.put("notifications", "");
@@ -79,10 +83,15 @@ public class RegisterActivity extends AppCompatActivity {
 
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().
                             getReference("patients/");
-                    databaseReference.child(patientID).setValue(userData);
+                    databaseReference.child(userID).setValue(userData);
+                    databaseReference.getRoot().child("usertype").child(userID).child("type").setValue("patient");
+                    databaseReference.getRoot().child("usertype").child(userID).child("uid").setValue(user.getUid());
 
+                    Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                    startActivity(intent);
+                } else {
+                    assert false;
                 }
-
             }
 
         });

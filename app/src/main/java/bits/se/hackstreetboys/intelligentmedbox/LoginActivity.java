@@ -34,6 +34,12 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +73,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         populateAutoComplete();
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        launchMainActivityAfterLogin(currentUser);
+        //launchMainActivityAfterLogin(currentUser);
+        if (currentUser != null)
+            launchNextActivity(currentUser.getEmail());
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -116,11 +124,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
         //System.out.println("password"+ password);
-        if(TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
-        } else if(isPasswordInvalid(password)) {
+        } else if (isPasswordInvalid(password)) {
             mPasswordView.setError(getString(R.string.error_insecure_password));
             focusView = mPasswordView;
             cancel = true;
@@ -138,22 +146,22 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "User registered successfully!", Toast.LENGTH_SHORT).show();
-                    if (signIn(email, password)) {
-                        Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                        //FirebaseUser user = mAuth.getCurrentUser();
-                        //updateUI(user);
-                        startActivity(intent);
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(LoginActivity.this, "User registered successfully!", Toast.LENGTH_SHORT).show();
+                            if (signIn(email, password)) {
+                                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                                //FirebaseUser user = mAuth.getCurrentUser();
+                                //updateUI(user);
+                                startActivity(intent);
+                            }
+                        } else {
+                            Toast.makeText(LoginActivity.this, "Could not register. Please try again.", Toast.LENGTH_SHORT).show();
+                        }
+                        showProgress(false);
                     }
-                } else {
-                    Toast.makeText(LoginActivity.this, "Could not register. Please try again.", Toast.LENGTH_SHORT).show();
-                }
-                showProgress(false);
-            }
-        });
+                });
     }
 
     private void populateAutoComplete() {
@@ -174,12 +182,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
             Snackbar.make(mEmailView, R.string.permission_rationale,
                     Snackbar.LENGTH_INDEFINITE).setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
+                @Override
+                @TargetApi(Build.VERSION_CODES.M)
+                public void onClick(View v) {
+                    requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
+                }
+            });
         } else {
             requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
         }
@@ -219,11 +227,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (TextUtils.isEmpty(password)){
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError(getString(R.string.error_field_required));
             focusView = mPasswordView;
             cancel = true;
-        } else if(isPasswordInvalid(password)) {
+        } else if (isPasswordInvalid(password)) {
             //System.out.println("invalid password "+ password);
             mPasswordView.setError(getString(R.string.error_insecure_password));
             focusView = mPasswordView;
@@ -249,9 +257,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            if(signIn(email, password)){
+            if (signIn(email, password)) {
                 FirebaseUser user = mAuth.getCurrentUser();
-                launchMainActivityAfterLogin(user);
+                //String modifiedEmail = ;
+                launchNextActivity(user.getEmail());
+                //launchMainActivityAfterLogin(MainActivity.getUserIdFromEmail(user.getEmail()));
             }
         }
     }
@@ -286,7 +296,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean isEmailInvalid(String email) {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." +
                 "[a-zA-Z0-9_+&*-]+)*@" +
                 "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
                 "A-Z]{2,7}$";
@@ -414,16 +424,50 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    private void launchMainActivityAfterLogin(FirebaseUser currentUser) {
-        if(currentUser == null) {
+    private void launchMainActivityAfterLogin(String userType) {
+        if (userType == null || userType.equals("")) {
             return;
         }
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+
+        //System.out.println("main activitiy" + userType);
+        Intent intent;
+        if (userType.equals("patient")) {
+            intent = new Intent(LoginActivity.this, MainActivity.class);
+        } else {
+            intent = new Intent(LoginActivity.this, DoctorActivity.class);
+        }
         //intent.putExtra("Name", currentUser.getDisplayName());
         //intent.putExtra("Name", "patient");
         //intent.putExtra("Email", currentUser.getEmail());
         startActivity(intent);
     }
 
+    private void launchNextActivity(String userEmail) {
+        if (userEmail == null || userEmail.equals(""))
+            return;
+        String modifiedEmail = MainActivity.getUserIdFromEmail(userEmail);
+        //System.out.println(modifiedEmail + " is user email.");
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance()
+                .getReference();
+        Query query = databaseReference.child("usertype").child(modifiedEmail);
+        //user info is stored at root/usertype/useremail/
+        //schema is {"uid": userUid, "usertype" : "patient" or "doctor"}
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+             @Override
+             public void onCancelled(@NonNull DatabaseError databaseError) {
+             }
+
+             @Override
+             public void onDataChange(DataSnapshot dataSnapshot) {
+                 if (dataSnapshot.exists()) {
+                     //System.out.println("result: " + dataSnapshot);
+                     String userType = String.valueOf(dataSnapshot.child("usertype").getValue());
+                     //System.out.println("user type is "+ userType);
+                     //Log.i("result", userType);
+                     launchMainActivityAfterLogin(userType);
+                 }
+             }
+        });
+    }
 }
 

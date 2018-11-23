@@ -51,7 +51,25 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="bits.se.hackstreetboys.intelligentmedbox.MainActivity" />
         </activity>
-        <activity android:name=".RegisterActivity"></activity>
+        <activity android:name=".RegisterActivity" />
+        <activity
+            android:name=".DoctorActivity"
+            android:label="@string/title_activity_doctor"
+            android:parentActivityName=".LoginActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="bits.se.hackstreetboys.intelligentmedbox.LoginActivity" />
+        </activity>
+        <activity
+            android:name=".AddPrescription"
+            android:label="@string/title_activity_add_prescription"
+            android:parentActivityName=".DoctorActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="bits.se.hackstreetboys.intelligentmedbox.DoctorActivity" />
+        </activity>
     </application>
 
 </manifest>

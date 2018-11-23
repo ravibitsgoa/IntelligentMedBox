@@ -29,30 +29,27 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
-public class MainActivity extends AppCompatActivity {
+public class DoctorActivity extends AppCompatActivity {
 
     private RecyclerView notificationsRecyclerView;
-    private FirebaseRecyclerAdapter<Object, MyViewHolder> notificationsAdapter;
+    private FirebaseRecyclerAdapter<Object, bits.se.hackstreetboys.intelligentmedbox.DoctorActivity.MyViewHolder> notificationsAdapter;
     private RecyclerView.LayoutManager layoutManager;
-    private static String patientID;
+    private static String doctorID;
     //private DatabaseReference mNotificationRef;
     private Query query;
     private static final String channelName = "notifications_channel";
-    private static int notificationId=0;
+    private static int notificationId = 0;
     private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_doctor);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -68,18 +65,14 @@ public class MainActivity extends AppCompatActivity {
 
         //patientName = getIntent().getStringExtra("Name");
         firebaseAuth = FirebaseAuth.getInstance();
-        if(firebaseAuth.getCurrentUser() == null ){
+        if (firebaseAuth.getCurrentUser() == null) {
             System.out.println("Error: No user logged in.");
             startActivity(new Intent(this, LoginActivity.class));
         }
         FirebaseUser user = firebaseAuth.getCurrentUser();
         //System.out.println(user.getUid());
-        patientID= user.getUid();
+        doctorID = MainActivity.getUserIdFromEmail(user.getEmail());
         initializeScreen();
-    }
-
-    public static String getUserIdFromEmail(String email) {
-        return email.replace('.', ',');
     }
 
     private void initializeScreen() {
@@ -89,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         //mNotificationRef = FirebaseDatabase.getInstance().
         //        getReference("patients/"+patientName+"/notifications");
         query = FirebaseDatabase.getInstance()
-                .getReference().child("patients/"+patientID+"/notifications")
+                .getReference().child("doctors/" + doctorID + "/notifications")
                 .limitToLast(50);
         ChildEventListener childEventListener = new ChildEventListener() {
             @Override
@@ -98,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 //System.out.println("hi");
                 assert map != null;
                 //System.out.println("hi");
-                MyNotification res= new MyNotification(map);
+                MyNotification res = new MyNotification(map);
                 //dataSnapshot.getValue(MyNotification.class);
                 //System.out.println(map);
                 //System.out.println(res);
@@ -106,16 +99,20 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+            public void onChildChanged(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            }
 
             @Override
-            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {}
+            public void onChildRemoved(@NonNull DataSnapshot dataSnapshot) {
+            }
 
             @Override
-            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) { }
+            public void onChildMoved(@NonNull DataSnapshot dataSnapshot, @Nullable String s) {
+            }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) { }
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
         };
         query.addChildEventListener(childEventListener);
         setupAdapter();
@@ -125,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendNotification(MyNotification myNotification) {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder
-                (MainActivity.this, channelName)
+                (bits.se.hackstreetboys.intelligentmedbox.DoctorActivity.this, channelName)
                 .setSmallIcon(R.drawable.med_icon)
                 .setContentTitle("Alert")
                 .setContentText(myNotification.toString())
@@ -134,38 +131,37 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-// notificationId is a unique int for each notification that you must define
+        // notificationId is a unique int for each notification that you must define
         notificationManager.notify(notificationId, mBuilder.build());
         notificationId++;
     }
 
     private void setupAdapter() {
         //notificationsRecyclerView.setHasFixedSize(true);
-        FirebaseRecyclerOptions<Object > options =
-                new FirebaseRecyclerOptions.Builder<Object >()
-                .setQuery(query, Object.class).build();
-        notificationsAdapter = new FirebaseRecyclerAdapter<Object, MyViewHolder>(options) {
-
+        FirebaseRecyclerOptions<Object> options =
+                new FirebaseRecyclerOptions.Builder<Object>()
+                        .setQuery(query, Object.class).build();
+        notificationsAdapter = new FirebaseRecyclerAdapter<Object, bits.se.hackstreetboys.intelligentmedbox.DoctorActivity.MyViewHolder>(options) {
             @Override
-            protected void onBindViewHolder(@NonNull MyViewHolder holder, int position,
+            protected void onBindViewHolder(@NonNull bits.se.hackstreetboys.intelligentmedbox.DoctorActivity.MyViewHolder holder, int position,
                                             @NonNull Object model) {
                 MyNotification myNotification = new MyNotification();
                 Map<String, Object> map = (Map<String, Object>) model;
                 //System.out.println("hmm");
                 //System.out.println(map);
-                MyNotification notification= new MyNotification(map);
+                MyNotification notification = new MyNotification(map);
                 holder.bind(notification);
             }
 
             @NonNull
             @Override
-            public MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+            public bits.se.hackstreetboys.intelligentmedbox.DoctorActivity.MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
                 // Create a new instance of the ViewHolder, in this case we are using a custom
                 // layout called R.layout.message for each item
                 View view = LayoutInflater.from(viewGroup.getContext())
                         .inflate(R.layout.notification_list_item, viewGroup, false);
 
-                return new MyViewHolder(view);
+                return new bits.se.hackstreetboys.intelligentmedbox.DoctorActivity.MyViewHolder(view);
             }
         };
         notificationsAdapter.startListening();
@@ -174,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_options, menu);
+        getMenuInflater().inflate(R.menu.doctor_menu_options, menu);
         return true;
     }
 
@@ -185,16 +181,10 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_view_log) {
             return true;
-        } else if (id == R.id.action_view_pre) {
-            Intent intent = new Intent(MainActivity.this, ViewPrescription.class);
-            //intent.putExtra("Name", patientName);
-            startActivity(intent);
-            return true;
-        } else if (id == R.id.action_add_med) {
-            Intent intent = new Intent(MainActivity.this, AddMedicine.class);
+        } else if (id == R.id.action_add_pres) {
+            Intent intent = new Intent(this, AddPrescription.class);
             startActivity(intent);
             return true;
         }
@@ -234,5 +224,4 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
     }
-
 }
